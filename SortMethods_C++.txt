@@ -1,0 +1,617 @@
+DataArray.h
+#ifndef DATAARRAY_H
+#define DATAARRAY_H
+
+#include <iostream>
+using namespace std;
+
+template <class T>
+class CDataArray {
+private: T* pData;
+	   unsigned int ArraySize;
+	   inline void swap(int i, int j);
+public:
+	CDataArray(int NumEl = 0);
+	~CDataArray();
+	CDataArray(const CDataArray& obj);
+	CDataArray(T* pInArray, unsigned int NumEl);
+	unsigned int GetSize() const;
+	const T* GetPtr() const;
+	T& operator[](unsigned int i);
+	CDataArray& operator=(const CDataArray& obj);
+	void Add(T El);
+	void Remove(unsigned int s);
+	void Reverse();
+	void PrintData();
+	void StupidSort(bool blDirUp);
+	void EvenOddSort(bool blDirUp);
+	void CombSort(bool blDirUp);
+	void BubbleSort(bool blDirUp);
+	void SelectionSort(bool blDirUp);
+	void ShakerSort(bool blDirUp);
+	void InsertionSort(bool blDirUp);
+	void ShellSort(int* ShellSteps, int NumSteps, bool blDirUp);
+	void MergeSort(bool blDirUp);
+	void QuickSort(bool bdDirUp);
+	void HeapSort(bool blDirUp);
+	void FindKMax_BFPRT(unsigned short k);
+	void FindKMax(unsigned short k);
+	void FindKMax_BFPRT_WithoutRepeat(unsigned short k);
+	void FindKMax_WithoutRepeat(unsigned short k);
+};
+
+template <class T>
+CDataArray<T>::CDataArray(int NumEl) {
+	if (NumEl) {
+		pData = new T[NumEl];
+		ArraySize = NumEl;
+	}
+	else {
+		ArraySize = 0;
+		pData = 0;
+	}
+}
+
+template <class T>
+CDataArray<T>::CDataArray(const CDataArray& obj) {
+	ArraySize = obj.GetSize();
+	pData = new T[ArraySize];
+	memcpy((void*)pData, (void*)obj.GetPtr(), ArraySize * sizeof(T));
+}
+
+template <class T>
+CDataArray<T>::CDataArray(T* pInArray, unsigned int NumEl) {
+	if (NumEl) {
+		ArraySize = NumEl;
+		pData = new T[ArraySize];
+		memcpy((void*)pData, (void*)pInArray, ArraySize * sizeof(T));
+	}
+	else {
+		ArraySize = 0;
+		pData = 0;
+	}
+}
+
+template <class T>
+unsigned int CDataArray<T>::GetSize() const {
+	return ArraySize;
+}
+template <class T>
+const T* CDataArray<T>::GetPtr() const {
+	return pData;
+}
+
+template <class T>
+T& CDataArray<T>::operator[](unsigned int i) {
+	if (i < 0 || i > ArraySize) i = 0;
+	return pData[i];
+}
+
+template <class T>
+CDataArray<T>& CDataArray<T>::operator=(const CDataArray& obj) {
+	if (this == &obj) return this;
+	unsigned int New_Len = obj.GetSize();
+	if (ArraySize != New_Len && ArraySize > 0) {
+		delete[] pData;
+		pData = 0;
+	}
+	if (New_Len > 0) {
+		if (ArraySize != New_Len) pData = new T[New_Len];
+		memcpy((void*)pData, (void*)obj.GetPtr(), New_Len * sizeof(T));
+		ArraySize = New_Len;
+	}
+	return *this;
+}
+
+template <class T>
+inline void CDataArray<T>::swap(int i, int j) {
+	T k;
+	k = pData[i];
+	pData[i] = pData[j];
+	pData[j] = k;
+}
+
+template <class T>
+void CDataArray<T>::Add(T El) {
+	T New_Arr = new T[ArraySize + 1];
+	if (ArraySize) {
+		memcpy((void*)New_Arr, (void*)pData, ArraySize * sizeof(T));
+		delete[] pData;
+	}
+	pData = New_Arr;
+	ArraySize = ArraySize + 1;
+	pData[ArraySize] = El;
+}
+
+template <class T>
+void CDataArray<T>::Remove(unsigned int s) {
+	if (ArraySize > 0 && s < ArraySize) {
+		T New_Arr = new T[ArraySize - 1];
+		memcpy((void*)New_Arr, (void*)pData, (s - 1) * sizeof(T));
+		memcpy((void*)(New_Arr + s), (void*)(pData + s + 1), (ArraySize - s - 1) * sizeof(T));
+		delete[] pData;
+		ArraySize = ArraySize - 1;
+		pData = New_Arr;
+	}
+}
+
+template <class T>
+void CDataArray<T>::Reverse() {
+
+	for (int i = 0; i < ArraySize / 2; i++) {
+		swap(i, ArraySize - i - 1);
+	}
+	/*
+	T* ptr_b = pData;
+	T* ptr_e = pData + ArraySize - 1;
+	T tmp;
+	while(ptr_b < ptr_e)
+	{
+		tmp = *ptr_b;
+		*ptr_b++ = *ptr_e;
+		*ptr_e-- = tmp;
+	}
+	*/
+
+}
+
+template <class T>
+void CDataArray<T>::PrintData() {
+	cout << endl;
+	if (ArraySize) {
+		for (int i = 0; i < ArraySize; i++) {
+			cout << pData[i] << " ";
+		}
+	}
+}
+
+template <class T>
+void CDataArray<T>::StupidSort(bool blDirUp) {
+	int j = 0;
+	while (j < ArraySize - 1) {
+		if (pData[j] > pData[j + 1]) {
+			swap(j, j + 1);
+			j = 0;
+		}
+		else j++;
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::EvenOddSort(bool blDirUp) {
+
+	bool check = true;
+	while (check == true) {
+		check = false;
+		for (int j = 0; j < ArraySize - 1; j = j + 2) {
+			if (pData[j] > pData[j + 1]) {
+				swap(j, j + 1);
+				check = true;
+			}
+		}
+		for (int j = 1; j < ArraySize - 1; j = j + 2) {
+			if (pData[j] > pData[j + 1]) {
+				swap(j, j + 1);
+				check = true;
+			}
+		}
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::CombSort(bool blDirUp) {
+
+	int k = ArraySize - 1;
+	while (k >= 1) {
+		for (int j = 0; k + j < ArraySize; j++) {
+			if (pData[j] > pData[k + j]) {
+				swap(j, k + j);
+			}
+		}
+		k--;
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::BubbleSort(bool blDirUp) {
+
+	for (int i = 0; i < ArraySize - 1; i++) {
+		for (int j = i + 1; j < ArraySize; j++) {
+			if (pData[i] > pData[j]) swap(i, j);
+		}
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::InsertionSort(bool blDirUp) {
+	for (unsigned int i = 1; i < ArraySize; i++) {
+		T x = pData[i];
+		unsigned int ind = i;
+		while (ind > 0 && x < pData[ind - 1]) {
+			pData[ind] = pData[ind - 1];
+			ind--;
+		}
+		pData[ind] = x;
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::SelectionSort(bool blDirUp) {
+	unsigned int minIndex;
+	for (unsigned int i = 0; i < ArraySize - 1; i++) {
+		minIndex = i;
+		for (unsigned int j = i + 1; j < ArraySize; j++) {
+			if (pData[j] < pData[minIndex]) minIndex = j;
+		}
+		if (minIndex == i) continue;
+		swap(minIndex, i);
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::ShakerSort(bool blDirUp) {
+	bool flag = true;
+	while (flag) {
+		flag = false;
+		unsigned int k = 1;
+		for (unsigned int i = k; i < ArraySize - k + 1; i++) {
+			if (pData[i - 1] > pData[i]) {
+				swap(i, i - 1);
+				flag = true;
+			}
+		}
+		for (unsigned int j = ArraySize - k - 1; j >= k; j--) {
+			if (pData[j] < pData[j - 1]) {
+				swap(j, j - 1);
+				flag = true;
+			}
+		}
+		k++;
+	}
+	if (!blDirUp) Reverse();
+}
+
+template <class T>
+void CDataArray<T>::ShellSort(int* ShellSteps, int NumSteps, bool blDirUp) {
+	for (ShellSteps[NumSteps]; NumSteps >= 0; NumSteps--) {
+		for (unsigned int i = ShellSteps[NumSteps]; i < ArraySize; i++) {
+			T save = pData[i];
+			unsigned int j;
+			for (j = i; j >= ShellSteps[NumSteps] && save < pData[j - ShellSteps[NumSteps]]; j = j - ShellSteps[NumSteps]) {
+				pData[j] = pData[j - NumSteps]; // ошибка, вместо NumSteps случайно ныписал 1
+			}
+			pData[j] = save;
+		}
+	}
+	if (!blDirUp) Reverse();
+}
+
+
+template <class T>
+CDataArray<T>::~CDataArray() {
+	if (ArraySize) delete[] pData;
+}
+
+template <class T>
+void CDataArray<T>::MergeSort(bool blDirUp) {
+	for (int i = 1; i < ArraySize; i *= 2) {
+		unsigned int size = 2 * i;
+		if (size > ArraySize) size = ArraySize;
+		T* result = new T[size];
+		for (int j = 0; j < ArraySize - i; j = j + 2 * i) {
+			unsigned int left = j, mid = i + j, right = j + 2 * i;
+			if (ArraySize < right) right = ArraySize;
+			unsigned int it1 = 0;
+			unsigned int it2 = 0;
+			while ((left + it1 < mid) && (mid + it2 < right)) {
+				if (pData[it1 + left] < pData[it2 + mid]) {
+					result[it1 + it2] = pData[it1 + left];
+					it1++;
+				}
+				else {
+					result[it1 + it2] = pData[it2 + mid];
+					it2++;
+				}
+			}
+			while (left + it1 < mid) {
+				result[it1 + it2] = pData[left + it1];
+				it1++;
+			}
+			while ((mid + it2 < right)) {
+				result[it1 + it2] = pData[mid + it2];
+				it2++;
+			}
+			for (int k = 0; k < it1 + it2; k++) {
+				pData[left + k] = result[k];
+			}
+		}
+		delete[] result;
+	}
+}
+
+template<class T>
+void CDataArray<T>::QuickSort(bool blDirUp) {
+	const unsigned int QuantityEl = 1048;
+	T pivot;
+	unsigned int UpperBound[QuantityEl];
+	unsigned int LowBound[QuantityEl];
+	unsigned int Bounds = 1;
+	UpperBound[1] = ArraySize - 1;
+	LowBound[1] = 0;
+	unsigned int ub, lb;
+	int i, j;
+
+	do {
+		ub = UpperBound[Bounds];
+		lb = LowBound[Bounds];
+		Bounds--;
+		pivot = pData[ub];
+
+		if (lb < ub) {
+			for (i = lb - 1, j = lb; j <= ub-1; j++) {
+				if (pData[j] <= pivot) {
+					i++;
+					swap(i, j);
+				}
+			}
+			i++;
+			swap(i, ub);
+			if (ub - lb > 1) {
+				if (ub - lb != 2 && i!=lb && i!=ub) {
+					Bounds++;
+					LowBound[Bounds] = lb;
+					UpperBound[Bounds] = i - 1;
+					Bounds++;
+					LowBound[Bounds] = i + 1;
+					UpperBound[Bounds] = ub;
+				}
+				else {
+					if (i == lb) {
+						Bounds++;
+						LowBound[Bounds] = i + 1;
+						UpperBound[Bounds] = ub;
+					}
+					if (i == ub) {
+						Bounds++;
+						LowBound[Bounds] = lb;
+						UpperBound[Bounds] = i - 1;
+
+					}
+				}
+			}
+		}
+
+	} while (Bounds!=0);
+	
+}
+
+template<class T>
+void CDataArray<T>::HeapSort(bool blDirUP) {
+	unsigned int n = ArraySize-1;
+	unsigned int heap = (n - 1) / 2;
+	for (int i = heap; i >= 0; i--) {
+		int j = i;
+		while (j <= heap) {
+			unsigned int largest = j;
+			unsigned int left = 2 * j + 1;
+			unsigned int right = 2 * j + 2;
+			if (left <= n && pData[left] > pData[largest]) largest = left;
+			if (right <= n && pData[right] > pData[largest]) largest = right;
+			if (largest != j) {
+				swap(j, largest);
+				j = largest;
+			}
+			else break;
+		}
+	}
+	swap(0, n);
+	for(int i = n-1; i > 0; i--){
+		heap = (i - 1) / 2;
+		unsigned int j = 0;
+		while (j <= heap) {
+			unsigned int largest = j;
+			unsigned int left = 2 * j + 1;
+			unsigned int right = 2 * j + 2;
+			if (left <= i && pData[left] > pData[largest]) largest = left;
+			if (right <= i && pData[right] > pData[largest]) largest = right;
+			if (largest != j) {
+				swap(j, largest);
+				j = largest;
+			}
+			else break;
+		}
+		swap(0, i);
+	}
+}
+
+template<class T>
+void CDataArray<T>::FindKMax_BFPRT(unsigned short k) {
+	if (k > ArraySize) k = ArraySize;
+	if (k == 0) k = 1;
+	T KMax;
+	unsigned int Upper = ArraySize - 1;
+	unsigned int Low = 0;
+	while (Upper > Low) {
+		T pivot = pData[Upper];
+		int c = Low - 1;
+		for (int i = Low; i < Upper; i++) {
+			if (pData[i] >= pivot) {
+				c++;
+				swap(i, c);
+			}
+		}
+		c++;
+		swap(c, Upper);
+		if (k - 1 > c) Low = c + 1;
+		if (k - 1 < c) Upper = c - 1;
+		if (k - 1 == c) {
+			KMax = pData[c];
+			break;
+		}
+		KMax = pData[Low];
+	}
+	cout << "\nFindKMax_BFPRT: " << KMax;
+}
+
+template<class T>
+void CDataArray<T>::FindKMax(unsigned short k) {
+	if (k > ArraySize) k = ArraySize;
+	if (k == 0) k = 1;
+	QuickSort(true);
+	cout << "\nFindKMax: " << pData[ArraySize - k];
+}
+
+
+template<class T>
+void CDataArray<T>::FindKMax_BFPRT_WithoutRepeat(unsigned short k) {
+	if (k > ArraySize) k = ArraySize;
+	if (k == 0) k = 1;
+	bool check;
+	T KMax;
+	T* Repeat = new T[ArraySize];
+	unsigned int quantity = 0, size = 0;
+	for (unsigned int i = 0; i < ArraySize; i++) {
+		check = true;
+		for (int l = i - 1; l >= 0; l--) {
+			if (pData[i] == Repeat[l]) check = false;
+		}
+		if (!check) continue;
+		else {
+			Repeat[size] = pData[i];
+			for (unsigned int j = i + 1; j < ArraySize; j++) {
+				if (pData[j] == Repeat[size]) quantity++;
+			}
+			size++;
+		}
+	}
+	if (k > size) k = size;
+	unsigned int Upper = size-1;
+	unsigned int Low = 0;
+	while ((Upper - Low) > 0) {
+		T pivot = Repeat[Upper];
+		int c = Low - 1;
+		for (int i = Low; i < Upper; i++) {
+			if (Repeat[i] > pivot) {
+				c++;
+				T change = Repeat[i];
+				Repeat[i] = Repeat[c];
+				Repeat[c] = change;
+			}
+		}
+		c++;
+		T ch = Repeat[c];
+		Repeat[c] = Repeat[Upper];
+		Repeat[Upper] = ch;
+		if (k-1 > c) Low = c + 1;
+		if (k - 1 < c) Upper = c - 1;
+		if (k - 1 == c) {
+			KMax = Repeat[c];
+			break;
+		}
+		KMax = Repeat[Low];
+	}
+	cout << "\nFindKMax_BFPRT: " << KMax;
+	delete[] Repeat;
+}
+
+template<class T>
+void CDataArray<T>::FindKMax_WithoutRepeat(unsigned short k) {
+	T Max = pData[ArraySize-1];
+	if (k > ArraySize) k = ArraySize;
+	if (k == 0) k = 1;
+	QuickSort(true);
+	unsigned int count = 0;
+	for (int i = ArraySize - 2; count < k && i >= 0; i--) {
+		if (pData[i] != Max) {
+			Max = pData[i];
+			count++;
+		}
+	}
+	cout << "\nFindKMax: " << Max;
+}
+
+
+int SequencesSedgwick(int* ShellSteps, unsigned int sizeArr) {
+	unsigned int p1, p2, p3;
+	p1 = p2 = 1;
+	p3 = 2;
+	int s = -1;
+	do {
+		s++;
+		if (s % 2 == 0) {
+			ShellSteps[s] = 9 * (p1 - p2) + 1;
+			p2 = p2 * 2;
+
+		}
+		else {
+			ShellSteps[s] = 8 * p1 - 6 * p3 + 1;
+			p3 = p3 * 2;
+		}
+		p1 = p1 * 2;
+	} while (3 * ShellSteps[s] < sizeArr);
+	return s;
+}
+
+int SequencesPratta(int* ShellSteps, unsigned int sizeArr) {
+	unsigned int p1 = 1, p2 = 1;
+	int s = -1;
+
+	do {
+		s++;
+		ShellSteps[s] = p1 * p2;
+		p1 = p1 * 2;
+		p2 = p2 * 3;
+	} while (ShellSteps[s] <= sizeArr / 2);
+	return s;
+}
+
+int SequencesCiura(int* ShellSteps, unsigned int sizeArr) {
+	unsigned int s = 9;
+	ShellSteps[0] = 1;
+	ShellSteps[1] = 4;
+	ShellSteps[3] = 10;
+	ShellSteps[4] = 23;
+	ShellSteps[5] = 57;
+	ShellSteps[6] = 132;
+	ShellSteps[7] = 301;
+	ShellSteps[8] = 701;
+	ShellSteps[9] = 1750;
+
+	do {
+		s++;
+		ShellSteps[s] = ShellSteps[s - 1] * 2.25;
+	} while (ShellSteps[s] < sizeArr / 2.25);
+
+	return s;
+}
+
+int SequencesFibonacci(int* ShellSteps, unsigned int sizeArr) {
+	unsigned int f, s = 0;
+	f = 1;
+	ShellSteps[0] = 1;
+	do {
+		s++;
+		ShellSteps[s] = ShellSteps[s - 1] + f;
+		f = ShellSteps[s - 1];
+	} while (ShellSteps[s] < sizeArr / 2);
+
+	return s;
+}
+
+int SequencesShell(int* ShellSteps, unsigned int sizeArr) {
+	ShellSteps[0] = 1;
+	int s = 0;
+	do {
+		s++;
+		ShellSteps[s] = ShellSteps[s - 1] * 2;
+	} while (ShellSteps[s] < sizeArr / 2);
+	return s;
+}
+
+#endif DATAARRAY_H
